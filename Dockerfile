@@ -2,13 +2,20 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Устанавливаем Flask и CORS
-RUN pip install --no-cache-dir \
-    Flask==3.0.0 \
-    flask-cors==4.0.0
+# Устанавливаем системные зависимости для pandas и lxml
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libxml2-dev \
+    libxslt-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Копируем и устанавливаем Python зависимости
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем приложение
-COPY app.py .
+COPY yfinance_server.py .
 
-# Запускаем Flask
-CMD ["python", "app.py"]
+# Запускаем сервер
+CMD ["python", "yfinance_server.py"]
